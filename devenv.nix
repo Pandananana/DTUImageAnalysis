@@ -1,10 +1,6 @@
 { pkgs, lib, config, inputs, ... }:
 
 {
-  enterShell = ''
-    jupyter notebook
-  '';
-
   languages.python = {
     enable = true;
     version = "3.9";

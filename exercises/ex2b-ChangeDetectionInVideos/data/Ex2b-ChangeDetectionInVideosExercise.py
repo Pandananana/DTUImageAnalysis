@@ -21,7 +21,7 @@ def capture_from_camera_and_show_images():
     url = 0
     use_droid_cam = False
     if use_droid_cam:
-        url = "http://192.168.1.120:4747/video"
+        url = "http://10.10.4.228:4747/video"
     cap = cv2.VideoCapture(url)
     # cap = cv2.VideoCapture(0)
     if not cap.isOpened():
@@ -37,8 +37,8 @@ def capture_from_camera_and_show_images():
         exit()
 
     # Transform image to gray scale and then to float, so we can do some processing
-    frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    frame_gray = img_as_float(frame_gray)
+    bg_frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    bg_frame_gray = img_as_float(bg_frame_gray)
 
     # To keep track of frames per second
     start_time = time.time()
@@ -55,7 +55,17 @@ def capture_from_camera_and_show_images():
         new_frame_gray = img_as_float(new_frame_gray)
 
         # Compute difference image
-        dif_img = np.abs(new_frame_gray - frame_gray)
+        dif_img = np.abs(new_frame_gray - bg_frame_gray)
+
+        # Create thresholded image
+        T = 0.1
+        bin_img = np.zeros_like(dif_img)
+        bin_img[dif_img > T] = 1
+        bin_img[dif_img <= T] = 0
+        bin_img = img_as_ubyte(bin_img)
+
+        F = (bin_img > 0).sum()
+        F_proc = F / bin_img.size * 100
 
         # Keep track of frames-per-second (FPS)
         n_frames = n_frames + 1
@@ -67,13 +77,22 @@ def capture_from_camera_and_show_images():
         font = cv2.FONT_HERSHEY_COMPLEX
         cv2.putText(new_frame, str_out, (100, 100), font, 1, 255, 1)
 
+        # Change Detection Alarm
+        A = 5
+        if F_proc > A:
+            str_out = f"Change Alarm!: {F_proc:.2f}%"
+            font = cv2.FONT_HERSHEY_COMPLEX
+            cv2.putText(new_frame, str_out, (100, 150), font, 1, (0, 0, 255), 1)
+
         # Display the resulting frame
         show_in_moved_window('Input', new_frame, 0, 10)
-        show_in_moved_window('Input gray', new_frame_gray, 600, 10)
-        show_in_moved_window('Difference image', dif_img, 1200, 10)
+        show_in_moved_window('Background', bg_frame_gray, 600, 10)
+        show_in_moved_window('Difference', dif_img, 1200, 10)
+        show_in_moved_window('Binary', bin_img, 0, 600)
 
         # Old frame is updated
-        frame_gray = new_frame_gray
+        a = 0.95
+        bg_frame_gray = a * bg_frame_gray + (1 - a) * new_frame_gray
 
         if cv2.waitKey(1) == ord('q'):
             stop = True

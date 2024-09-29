@@ -34,6 +34,25 @@ def process_rgb_image(img):
     proc_img[:, :, 0] = 1 - r_comp
     return proc_img
 
+def gamma_map(img, gamma):
+    """
+    Gamma mapping of an image
+    """
+    img_float = img_as_float(img.copy())
+    return img_as_ubyte(img_float ** gamma)
+
+def detect_dtu_signs_hsv(im_org):
+    """
+    Segmentation function in HSV space
+    """
+    hsv_img = color.rgb2hsv(im_org.copy())
+    hue_img = hsv_img[:, :, 0]
+    value_img = hsv_img[:, :, 2]
+
+    # Create binary image from the hue image
+    segm = (hue_img > 0.5) & (value_img > 0.5) & (value_img < 0.8)
+
+    return img_as_ubyte(segm)
 
 def capture_from_camera_and_show_images():
     print("Starting image capture")
@@ -53,7 +72,8 @@ def capture_from_camera_and_show_images():
     old_time = time.perf_counter()
     fps = 0
     stop = False
-    process_rgb = False
+    process_rgb = True
+    gamma = 2
     while not stop:
         ret, new_frame = cap.read()
         if not ret:
@@ -64,11 +84,11 @@ def capture_from_camera_and_show_images():
         new_image = new_frame[:, :, ::-1]
         new_image_gray = color.rgb2gray(new_image)
         if process_rgb:
-            proc_img = process_rgb_image(new_image)
+            proc_img = detect_dtu_signs_hsv(new_image)
             # convert back to OpenCV BGR to show it
-            proc_img = proc_img[:, :, ::-1]
+            # proc_img = proc_img[:, :, ::-1]
         else:
-            proc_img = process_gray_image(new_image_gray)
+            proc_img = gamma_map(new_image_gray, gamma)
 
         # update FPS - but do it slowly to avoid fast changing number
         new_time = time.perf_counter()

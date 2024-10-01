@@ -24,6 +24,13 @@ def process_gray_image(img):
     """
     # Do something here:
     proc_img = img.copy()
+
+    proc_img = median(proc_img, np.ones((5, 5))) 
+    proc_img = prewitt(proc_img)
+    otsu = threshold_otsu(proc_img)
+    proc_img[proc_img < otsu] = 0
+    proc_img[proc_img >= otsu] = 1
+
     return img_as_ubyte(proc_img)
 
 

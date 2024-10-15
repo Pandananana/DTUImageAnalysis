@@ -2,8 +2,9 @@
 .devenv*
 devenv.local.nix
 
-# direnv
-.direnv
+# Virtual environments
+.direnv/
+.venv/
 
 # pre-commit
 .pre-commit-config.yaml

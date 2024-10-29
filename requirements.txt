@@ -4,7 +4,7 @@ opencv-python==4.10.0.84
 scikit-image==0.24.0 
 matplotlib==3.9.2
 imagecodecs==2024.9.22 
-pydicom==3.0.1
+pydicom==2.4.4
 seaborn==0.13.2
 pandas==2.2.3
 ipywidgets==8.1.5

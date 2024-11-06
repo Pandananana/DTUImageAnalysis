@@ -10,3 +10,4 @@ devenv.local.nix
 .pre-commit-config.yaml
 exercises/ex8-CatsCatsCats/data/preprocessed/
 exercises/ex8-CatsCatsCats/data/training_data
+exercises/ex6b-AdvancedPixelClassification/__pycache__/LDA.cpython-311.pyc
